@@ -505,33 +505,86 @@ You can write LaTeX here and see HTML preview on the right.</textarea>
             btn.innerHTML = '<i class="ph ph-spinner loading-spinner mr-2"></i>Generating Video...';
             btn.disabled = true;
             statusDiv.classList.remove('hidden');
-            statusDiv.querySelector('p').textContent = 'Generating whiteboard video with handwritten animation and Indian voiceover... This may take a minute.';
+            statusDiv.querySelector('p').textContent = 'Starting video generation...';
 
             try {
                 const r = await fetch(`${API_URL}/api/videos/create`, {
                     method: 'POST', headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ question_text: questionText, solution_text: solutionText, voiceover_style: voiceoverStyle })
                 });
-                const data = await r.json();
-                if (data.status === 'success') {
-                    statusDiv.querySelector('p').textContent = 'Video generated successfully! You can preview and download below.';
-                    const videoUrl = `${API_URL}${data.video_url}`;
-                    const player = document.getElementById('videoPlayer');
-                    player.src = videoUrl;
-                    player.classList.remove('hidden');
-                    document.getElementById('whiteboardPreview').classList.add('hidden');
-                    const downloadLink = document.getElementById('videoDownloadLink');
-                    downloadLink.href = videoUrl;
-                    downloadLink.classList.remove('hidden');
+
+                let data;
+                const responseText = await r.text();
+                try { data = JSON.parse(responseText); } catch(parseErr) {
+                    statusDiv.querySelector('p').textContent = 'Server returned an unexpected response. Retrying...';
+                    btn.innerHTML = '<i class="ph ph-play-circle mr-2"></i>Generate Video Solution';
+                    btn.disabled = false;
+                    return;
+                }
+
+                if (data.status === 'processing') {
+                    statusDiv.querySelector('p').textContent = 'Generating whiteboard video with handwritten animation and Indian voiceover...';
+                    pollVideoStatus(data.id, statusDiv, btn);
+                } else if (data.status === 'success' || data.status === 'completed') {
+                    onVideoReady(data, statusDiv, btn);
                 } else {
-                    statusDiv.querySelector('p').textContent = `Error: ${data.error}`;
+                    statusDiv.querySelector('p').textContent = `Error: ${data.error || 'Unknown error'}`;
+                    btn.innerHTML = '<i class="ph ph-play-circle mr-2"></i>Generate Video Solution';
+                    btn.disabled = false;
                 }
             } catch (e) {
-                statusDiv.querySelector('p').textContent = `Error: ${e.message}`;
-            } finally {
+                statusDiv.querySelector('p').textContent = `Network error: ${e.message}. Please try again.`;
                 btn.innerHTML = '<i class="ph ph-play-circle mr-2"></i>Generate Video Solution';
                 btn.disabled = false;
             }
+        }
+
+        function pollVideoStatus(videoId, statusDiv, btn) {
+            let pollCount = 0;
+            const maxPolls = 60;
+            const pollInterval = setInterval(async () => {
+                pollCount++;
+                if (pollCount > maxPolls) {
+                    clearInterval(pollInterval);
+                    statusDiv.querySelector('p').textContent = 'Video generation timed out. Please try again.';
+                    btn.innerHTML = '<i class="ph ph-play-circle mr-2"></i>Generate Video Solution';
+                    btn.disabled = false;
+                    return;
+                }
+                try {
+                    const r = await fetch(`${API_URL}/api/videos/status/${videoId}`);
+                    const responseText = await r.text();
+                    let data;
+                    try { data = JSON.parse(responseText); } catch(e) { return; }
+
+                    if (data.status === 'completed') {
+                        clearInterval(pollInterval);
+                        onVideoReady(data, statusDiv, btn);
+                    } else if (data.status === 'failed') {
+                        clearInterval(pollInterval);
+                        statusDiv.querySelector('p').textContent = `Error: ${data.error}`;
+                        btn.innerHTML = '<i class="ph ph-play-circle mr-2"></i>Generate Video Solution';
+                        btn.disabled = false;
+                    } else {
+                        const dots = '.'.repeat((pollCount % 3) + 1);
+                        statusDiv.querySelector('p').textContent = `Generating whiteboard video${dots} (${pollCount}s)`;
+                    }
+                } catch(e) { /* ignore poll errors, keep trying */ }
+            }, 1000);
+        }
+
+        function onVideoReady(data, statusDiv, btn) {
+            statusDiv.querySelector('p').textContent = 'Video generated successfully! You can preview and download below.';
+            const videoUrl = `${API_URL}${data.video_url}`;
+            const player = document.getElementById('videoPlayer');
+            player.src = videoUrl;
+            player.classList.remove('hidden');
+            document.getElementById('whiteboardPreview').classList.add('hidden');
+            const downloadLink = document.getElementById('videoDownloadLink');
+            downloadLink.href = videoUrl;
+            downloadLink.classList.remove('hidden');
+            btn.innerHTML = '<i class="ph ph-play-circle mr-2"></i>Generate Video Solution';
+            btn.disabled = false;
         }
 
         // Module 4: AI Prompts

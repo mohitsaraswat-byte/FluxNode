@@ -244,17 +244,14 @@ async def get_comic_scripts():
     return JSONResponse(content=comics)
 
 # Module 3: Video Solutions with MoviePy + gTTS
-@api_router.post("/videos/create")
-async def create_video_solution(input: VideoSolutionCreate):
+# Background task tracker
+video_tasks = {}
+
+async def _run_video_generation(video_id, question, solution, voice_style):
+    """Background task for video generation"""
     try:
-        video_id = str(uuid.uuid4())
-        question = input.question_text
-        solution = input.solution_text
-        voice_style = input.voiceover_style
-
-        # Generate video in background
+        video_tasks[video_id] = {"status": "processing", "progress": "Generating audio..."}
         video_path = await generate_whiteboard_video(video_id, question, solution, voice_style)
-
         if video_path:
             doc = {
                 "id": video_id,
@@ -265,18 +262,36 @@ async def create_video_solution(input: VideoSolutionCreate):
                 "timestamp": datetime.now(timezone.utc).isoformat()
             }
             await db.video_solutions.insert_one(doc)
-
-            return JSONResponse(content={
-                "id": video_id,
-                "status": "success",
-                "video_url": f"/api/videos/download/{video_id}"
-            })
+            video_tasks[video_id] = {"status": "completed", "video_url": f"/api/videos/download/{video_id}"}
         else:
-            return JSONResponse(status_code=500, content={"error": "Video generation failed", "status": "failed"})
+            video_tasks[video_id] = {"status": "failed", "error": "Video generation failed"}
+    except Exception as e:
+        logger.error(f"Background video error: {str(e)}")
+        video_tasks[video_id] = {"status": "failed", "error": str(e)}
 
+@api_router.post("/videos/create")
+async def create_video_solution(input: VideoSolutionCreate):
+    try:
+        video_id = str(uuid.uuid4())
+        # Start background task
+        asyncio.create_task(_run_video_generation(video_id, input.question_text, input.solution_text, input.voiceover_style))
+        video_tasks[video_id] = {"status": "processing", "progress": "Starting video generation..."}
+        # Return immediately so the request doesn't timeout
+        return JSONResponse(content={"id": video_id, "status": "processing"})
     except Exception as e:
         logger.error(f"Error creating video: {str(e)}")
         return JSONResponse(status_code=500, content={"error": str(e), "status": "failed"})
+
+@api_router.get("/videos/status/{video_id}")
+async def get_video_status(video_id: str):
+    """Poll this endpoint to check video generation progress"""
+    if video_id in video_tasks:
+        return JSONResponse(content={"id": video_id, **video_tasks[video_id]})
+    # Check if video already exists on disk
+    video_path = VIDEOS_DIR / f"{video_id}.mp4"
+    if video_path.exists():
+        return JSONResponse(content={"id": video_id, "status": "completed", "video_url": f"/api/videos/download/{video_id}"})
+    return JSONResponse(status_code=404, content={"id": video_id, "status": "not_found"})
 
 @api_router.get("/videos/download/{video_id}")
 async def download_video(video_id: str):
