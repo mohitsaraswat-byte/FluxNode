@@ -1,0 +1,124 @@
+{
+  "project_name": "AI Educational Content Creator Dashboard",
+  "theme": "light",
+  "archetype": "Archetype 4 (Swiss & High-Contrast) - Modified for Zero Eye Strain",
+  "design_philosophy": "Professional, structural, and calm. To reduce eye strain during long editing sessions, we avoid pure white backgrounds on the main body and pure black text. Instead, we use warm bone-whites, deep charcoals, and strict 1px grid structures to separate complex forms. Function over decoration. Asymmetry is used to prioritize the active workspace.",
+  "colors": {
+    "background": {
+      "hex": "#F9F9F7",
+      "tailwind": "bg-[#F9F9F7]",
+      "usage": "Main application background (sidebar, outer margins)"
+    },
+    "surface": {
+      "hex": "#FFFFFF",
+      "tailwind": "bg-white",
+      "usage": "Editor panes, form containers, active content areas"
+    },
+    "text_primary": {
+      "hex": "#1C1C1A",
+      "tailwind": "text-[#1C1C1A]",
+      "usage": "Headings, main body text, user inputs"
+    },
+    "text_secondary": {
+      "hex": "#5C5C59",
+      "tailwind": "text-[#5C5C59]",
+      "usage": "Labels, overlines, secondary descriptions, placeholder text"
+    },
+    "border": {
+      "hex": "#E5E5E0",
+      "tailwind": "border-[#E5E5E0]",
+      "usage": "Dividers, form input borders, pane separators"
+    },
+    "primary_accent": {
+      "hex": "#2D3A4B",
+      "tailwind": "bg-[#2D3A4B]",
+      "usage": "Primary CTA buttons, active sidebar tab highlights, progress indicators"
+    },
+    "primary_accent_hover": {
+      "hex": "#1A232E",
+      "tailwind": "hover:bg-[#1A232E] hover:text-white",
+      "usage": "Hover state for primary buttons"
+    },
+    "terminal_bg": {
+      "hex": "#0D1117",
+      "tailwind": "bg-[#0D1117] text-[#58A6FF]",
+      "usage": "Comic script generator terminal output area"
+    }
+  },
+  "typography": {
+    "fonts": {
+      "headings": "'Work Sans', sans-serif",
+      "body": "'IBM Plex Sans', sans-serif",
+      "mono": "'IBM Plex Mono', monospace"
+    },
+    "hierarchy": {
+      "h1": "text-3xl sm:text-4xl font-semibold tracking-tight leading-tight",
+      "h2": "text-xl sm:text-2xl font-medium tracking-tight",
+      "h3": "text-lg font-medium",
+      "body": "text-base leading-relaxed",
+      "labels": "text-xs font-semibold uppercase tracking-[0.1em] text-[#5C5C59]"
+    }
+  },
+  "layout_spacing": {
+    "structure": {
+      "sidebar": "w-[20%] h-screen fixed left-0 top-0 border-r border-[#E5E5E0] bg-[#F9F9F7] flex flex-col z-40",
+      "main_content": "w-[80%] ml-[20%] min-h-screen bg-white"
+    },
+    "padding": {
+      "section": "p-8 md:p-12",
+      "container": "p-6",
+      "dense": "p-4"
+    },
+    "grids": {
+      "bento_form": "grid grid-cols-1 md:grid-cols-12 gap-6",
+      "split_pane": "grid grid-cols-1 lg:grid-cols-2 gap-0 border border-[#E5E5E0] min-h-[70vh]"
+    }
+  },
+  "component_rules": {
+    "sidebar_navigation": {
+      "style": "Clean text items. Active state: bg-white border-y border-[#E5E5E0] text-[#1C1C1A] font-medium. Inactive: hover:bg-black/5 text-[#5C5C59]. Include generic avatar at bottom.",
+      "spacing": "py-4 px-6"
+    },
+    "forms_inputs": {
+      "style": "No heavy drop shadows. Flat, 1px solid border-[#E5E5E0] focus:border-[#2D3A4B] focus:ring-1 focus:ring-[#2D3A4B] bg-[#F9F9F7] focus:bg-white transition-colors duration-200. Slight rounded corners (rounded-md).",
+      "labels": "Uppercase tracking-[0.1em] text-xs font-semibold text-[#5C5C59] mb-2 block"
+    },
+    "buttons": {
+      "primary": "bg-[#2D3A4B] text-white px-6 py-3 rounded-md font-medium hover:bg-[#1A232E] transition-all",
+      "secondary": "bg-transparent border border-[#E5E5E0] text-[#1C1C1A] px-6 py-3 rounded-md hover:bg-[#F9F9F7] transition-all"
+    },
+    "panels_cards": {
+      "style": "Cardless design approach. Use pure white surfaces separated by 1px borders instead of floating boxes with shadows. Keeps the UI grounded and professional."
+    },
+    "module_specifics": {
+      "module_1_latex": "Split pane editor. Left pane: textarea with mono font, bg-[#F9F9F7]. Right pane: HTML preview area bg-white.",
+      "module_2_comic": "Terminal style output must use terminal_bg colors. Input area standard bento form.",
+      "module_3_animated": "Split layout. Left: question/voiceover inputs. Right: Image upload and video preview.",
+      "module_4_ai_prompt": "7-layer form interface. Use an accordion or vertical step-by-step layout (border-l-2 border-[#E5E5E0]) to avoid overwhelming the user. Each layer should be clearly numbered."
+    }
+  },
+  "media": {
+    "user_avatar": {
+      "url": "https://images.unsplash.com/photo-1707396172424-f3293f788364?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzR8MHwxfHNlYXJjaHwyfHxwcm9maWxlJTIwYXZhdGFyJTIwcHJvZmVzc2lvbmFsfGVufDB8fHx8MTc3NjM2NTg3NXww&ixlib=rb-4.1.0&q=85",
+      "description": "Professional user avatar for sidebar bottom",
+      "usage": "Sidebar footer profile picture"
+    },
+    "comic_placeholder": {
+      "url": "https://images.unsplash.com/photo-1763315371360-96015292bbf8?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NzR8MHwxfHNlYXJjaHwyfHxjb21pYyUyMGJvb2slMjBpbGx1c3RyYXRpb24lMjBzaW1wbGV8ZW58MHx8fHwxNzc2MzY1ODc1fDA&ixlib=rb-4.1.0&q=85",
+      "description": "Manga panels with characters in-action",
+      "usage": "Placeholder image for Comic script generator output module"
+    },
+    "video_thumbnail_placeholder": {
+      "url": "https://images.unsplash.com/photo-1760009229725-7ef1990e585f?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NjZ8MHwxfHNlYXJjaHwxfHxlZHVjYXRpb24lMjBhbmltYXRlZCUyMHZpZGVvJTIwdGh1bWJuYWlsfGVufDB8fHx8MTc3NjM2NTg3NXww&ixlib=rb-4.1.0&q=85",
+      "description": "School supplies floating with a paper airplane",
+      "usage": "Placeholder for Animated video solution generator / AI Video prompt result"
+    }
+  },
+  "technical_instructions": {
+    "framework": "Vanilla HTML5 + Tailwind CSS (via CDN) + Vanilla JavaScript",
+    "tailwind_config_script": "You must include <script src=\"https://cdn.tailwindcss.com\"></script> and configure the tailwind.config inside a <script> block to add custom fonts and colors.",
+    "icons": "Use Phosphor Icons via CDN (<script src=\"https://unpkg.com/@phosphor-icons/web\"></script>) for crisp, professional line icons matching the typography.",
+    "testing": "All interactive elements (buttons, inputs, tabs, forms) MUST include a data-testid attribute for robust automated testing (e.g., data-testid='sidebar-tab-module1').",
+    "motion": "Use minimal transition classes (transition-all duration-200 ease-in-out) on interactive states to maintain a snappy, functional dashboard feel."
+  }
+}
