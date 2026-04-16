@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Educational Content Creator</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'app-bg': '#F9F9F7',
+                        'app-surface': '#FFFFFF',
+                        'app-text': '#1C1C1A',
+                        'app-text-secondary': '#5C5C59',
+                        'app-border': '#E5E5E0',
+                        'app-primary': '#2D3A4B',
+                        'app-primary-hover': '#1A232E',
+                        'app-terminal': '#0D1117',
+                        'app-terminal-text': '#58A6FF'
+                    },
+                    fontFamily: {
+                        'sans': ['IBM Plex Sans', 'sans-serif'],
+                        'heading': ['Work Sans', 'sans-serif'],
+                        'mono': ['IBM Plex Mono', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Work Sans', sans-serif;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .terminal-output {
+            font-family: 'IBM Plex Mono', monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .latex-editor, .html-preview {
+            min-height: 70vh;
+        }
+        
+        .sidebar-item {
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .sidebar-item.active {
+            background: white;
+            border-top: 1px solid #E5E5E0;
+            border-bottom: 1px solid #E5E5E0;
+            color: #1C1C1A;
+            font-weight: 500;
+        }
+        
+        .sidebar-item:not(.active):hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body class="bg-app-surface">
+    
+    <!-- Sidebar -->
+    <aside class="fixed left-0 top-0 w-1/5 h-screen bg-app-bg border-r border-app-border flex flex-col z-40">
+        <!-- Logo/Header -->
+        <div class="p-6 border-b border-app-border">
+            <h2 class="text-xl font-semibold text-app-text tracking-tight">AI Content Creator</h2>
+            <p class="text-xs uppercase tracking-widest text-app-text-secondary mt-1">Educational Tools</p>
+        </div>
+        
+        <!-- Navigation -->
+        <nav class="flex-1 py-4">
+            <button data-testid="sidebar-tab-module1" onclick="switchModule('module1')" class="sidebar-item w-full py-4 px-6 text-left text-app-text-secondary">
+                <i class="ph ph-book-open text-lg mr-3"></i>
+                <span>Digital Books</span>
+            </button>
+            <button data-testid="sidebar-tab-module2" onclick="switchModule('module2')" class="sidebar-item active w-full py-4 px-6 text-left text-app-text-secondary">
+                <i class="ph ph-images text-lg mr-3"></i>
+                <span>Comic Scripts</span>
+            </button>
+            <button data-testid="sidebar-tab-module3" onclick="switchModule('module3')" class="sidebar-item w-full py-4 px-6 text-left text-app-text-secondary">
+                <i class="ph ph-video text-lg mr-3"></i>
+                <span>Video Solutions</span>
+            </button>
+            <button data-testid="sidebar-tab-module4" onclick="switchModule('module4')" class="sidebar-item w-full py-4 px-6 text-left text-app-text-secondary">
+                <i class="ph ph-film-script text-lg mr-3"></i>
+                <span>AI Video Prompts</span>
+            </button>
+        </nav>
+        
+        <!-- User Avatar -->
+        <div class="p-6 border-t border-app-border">
+            <div class="flex items-center gap-3">
+                <img src="https://images.unsplash.com/photo-1707396172424-f3293f788364?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzR8MHwxfHNlYXJjaHwyfHxwcm9maWxlJTIwYXZhdGFyJTIwcHJvZmVzc2lvbmFsfGVufDB8fHx8MTc3NjM2NTg3NXww&ixlib=rb-4.1.0&q=85" 
+                     alt="User" 
+                     class="w-10 h-10 rounded-full object-cover">
+                <div>
+                    <p class="text-sm font-medium text-app-text">Educator</p>
+                    <p class="text-xs text-app-text-secondary">Content Creator</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+    
+    <!-- Main Content Area -->
+    <main class="ml-[20%] w-[80%] min-h-screen bg-app-surface">
+        
+        <!-- Module 1: Digital Books -->
+        <section id="module1" class="module-content hidden p-12">
+            <div class="mb-8">
+                <h1 class="text-3xl sm:text-4xl font-semibold tracking-tight text-app-text mb-2">Interactive Digital Books</h1>
+                <p class="text-base text-app-text-secondary">Create educational content with LaTeX and preview HTML output in real-time.</p>
+            </div>
+            
+            <!-- Split Pane Editor -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-0 border border-app-border min-h-[70vh]">
+                <!-- Left Pane: LaTeX Input -->
+                <div class="border-r border-app-border bg-app-bg p-6">
+                    <label class="text-xs font-semibold uppercase tracking-widest text-app-text-secondary mb-2 block">LaTeX Input</label>
+                    <textarea 
+                        id="latexInput" 
+                        data-testid="latex-input-field"
+                        class="w-full h-[calc(70vh-3rem)] p-4 font-mono text-sm bg-app-bg border border-app-border rounded-md focus:border-app-primary focus:ring-1 focus:ring-app-primary focus:bg-white resize-none"
+                        placeholder="Enter your LaTeX content here...\n\nExample:\n\\section{Introduction}\nThis is a sample chapter.">\\section{Introduction}\n\nWelcome to the **Interactive Digital Book** creator.\n\n\\subsection{Getting Started}\n\nYou can write LaTeX here and see HTML preview on the right.</textarea>
+                </div>
+                
+                <!-- Right Pane: HTML Preview -->
+                <div class="bg-white p-6">
+                    <label class="text-xs font-semibold uppercase tracking-widest text-app-text-secondary mb-2 block">HTML Preview</label>
+                    <div id="htmlPreview" data-testid="html-preview-area" class="prose max-w-none h-[calc(70vh-3rem)] overflow-auto p-4 border border-app-border rounded-md">
+                        <h2>Introduction</h2>
+                        <p>Welcome to the <strong>Interactive Digital Book</strong> creator.</p>
+                        <h3>Getting Started</h3>
+                        <p>You can write LaTeX here and see HTML preview on the right.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-6 flex gap-4">
+                <button data-testid="render-book-button" onclick="renderBookContent()" class="bg-app-primary text-white px-6 py-3 rounded-md font-medium hover:bg-app-primary-hover transition-all">
+                    <i class="ph ph-check-circle mr-2"></i>Render & Save
+                </button>
+                <button data-testid="clear-book-button" onclick="clearBookEditor()" class="bg-transparent border border-app-border text-app-text px-6 py-3 rounded-md hover:bg-app-bg transition-all">
+                    <i class="ph ph-x-circle mr-2"></i>Clear
+                </button>
+            </div>
+        </section>
+        
+        <!-- Module 2: Comic Scripts -->
+        <section id="module2" class="module-content p-12">
+            <div class="mb-8">
+                <h1 class="text-3xl sm:text-4xl font-semibold tracking-tight text-app-text mb-2">Diagram-Based Comics Generator</h1>
+                <p class="text-base text-app-text-secondary">Generate engaging comic scripts from educational concepts using AI.</p>
+            </div>
+            
+            <!-- Input Form -->
+            <div class="grid grid-cols-1 gap-6 mb-6">
+                <div>
+                    <label class="text-xs font-semibold uppercase tracking-widest text-app-text-secondary mb-2 block">Educational Concept</label>
+                    <textarea 
+                        id="comicConcept" 
+                        data-testid="comic-concept-input"
+                        class="w-full h-32 p-4 bg-app-bg border border-app-border rounded-md focus:border-app-primary focus:ring-1 focus:ring-app-primary focus:bg-white transition-colors duration-200 resize-none"
+                        placeholder="Describe the educational concept you want to explain through a comic...\n\nExample: Explain photosynthesis to 10-year-olds"></textarea>
+                </div>
+                
+                <div>
+                    <label class="text-xs font-semibold uppercase tracking-widest text-app-text-secondary mb-2 block">Reference Diagrams (Optional)</label>
+                    <input 
+                        type="file" 
+                        id="comicDiagrams" 
+                        data-testid="comic-diagrams-upload"
+                        multiple 
+                        accept="image/*"
+                        class="w-full p-3 bg-app-bg border border-app-border rounded-md focus:border-app-primary focus:ring-1 focus:ring-app-primary focus:bg-white transition-colors duration-200">
+                </div>
+            </div>
+            
+            <button data-testid="generate-comic-button" onclick="generateComicScript()" class="bg-app-primary text-white px-6 py-3 rounded-md font-medium hover:bg-app-primary-hover transition-all mb-6">
+                <i class="ph ph-magic-wand mr-2"></i>Generate Comic Script
+            </button>
+            
+            <!-- Terminal Output -->
+            <div class="bg-app-terminal border border-app-border rounded-md p-6 min-h-[40vh]">
+                <div class="flex items-center justify-between mb-4">
+                    <label class="text-xs font-semibold uppercase tracking-widest text-app-terminal-text">AI Agent Output</label>
+                    <button data-testid="clear-comic-output-button" onclick="clearComicOutput()" class="text-xs text-app-terminal-text hover:text-white transition-colors">
+                        <i class="ph ph-x mr-1"></i>Clear
+                    </button>
+                </div>
+                <div id="comicOutput" data-testid="comic-output-terminal" class="terminal-output text-app-terminal-text text-sm">
+                    <span class="opacity-50">Ready to generate comic scripts...</span>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Module 3: Video Solutions -->
+        <section id="module3" class="module-content hidden p-12">
+            <div class="mb-8">
+                <h1 class="text-3xl sm:text-4xl font-semibold tracking-tight text-app-text mb-2">Faceless Animated Video Solutions</h1>
+                <p class="text-base text-app-text-secondary">Create automated educational solution videos with text-to-speech.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Left: Question Input -->
+                <div class="space-y-6">
+                    <div>
+                        <label class="text-xs font-semibold uppercase tracking-widest text-app-text-secondary mb-2 block">Question Text</label>
+                        <textarea 
+                            id="questionText" 
+                            data-testid="question-text-input"
+                            class="w-full h-40 p-4 bg-app-bg border border-app-border rounded-md focus:border-app-primary focus:ring-1 focus:ring-app-primary focus:bg-white transition-colors duration-200 resize-none"
+                            placeholder="Enter the educational question or problem..."></textarea>
+                    </div>
+                    
+                    <div>
+                        <label class="text-xs font-semibold uppercase tracking-widest text-app-text-secondary mb-2 block">Voiceover Style</label>
+                        <select 
+                            id="voiceoverStyle" 
+                            data-testid="voiceover-style-select"
+                            class="w-full p-3 bg-app-bg border border-app-border rounded-md focus:border-app-primary focus:ring-1 focus:ring-app-primary focus:bg-white transition-colors duration-200">
+                            <option value="professional">Professional</option>
+                            <option value="friendly">Friendly</option>
+                            <option value="enthusiastic">Enthusiastic</option>
+                        </select>
+                    </div>
+                    
+                    <button data-testid="generate-video-button" onclick="generateVideoSolution()" class="w-full bg-app-primary text-white px-6 py-3 rounded-md font-medium hover:bg-app-primary-hover transition-all">
+                        <i class="ph ph-play-circle mr-2"></i>Generate Video Solution
+                    </button>
+                </div>
+                
+                <!-- Right: Image Upload & Preview -->
+                <div class="space-y-6">
+                    <div>
+                        <label class="text-xs font-semibold uppercase tracking-widest text-app-text-secondary mb-2 block">Question Image</label>
+                        <input 
+                            type="file" 
+                            id="questionImage" 
+                            data-testid="question-image-upload"
+                            accept="image/*"
+                            onchange="previewQuestionImage()"
+                            class="w-full p-3 bg-app-bg border border-app-border rounded-md focus:border-app-primary focus:ring-1 focus:ring-app-primary focus:bg-white transition-colors duration-200">
+                    </div>
+                    
+                    <div id="imagePreviewContainer" data-testid="image-preview-container" class="border border-app-border rounded-md p-4 min-h-[300px] flex items-center justify-center bg-app-bg">
+                        <img id="imagePreview" src="https://images.unsplash.com/photo-1760009229725-7ef1990e585f?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NjZ8MHwxfHNlYXJjaHwxfHxlZHVjYXRpb24lMjBhbmltYXRlZCUyMHZpZGVvJTIwdGh1bWJuYWlsfGVufDB8fHx8MTc3NjM2NTg3NXww&ixlib=rb-4.1.0&q=85" alt="Preview" class="max-w-full max-h-[300px] rounded-md">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Status Message -->
+            <div id="videoStatus" data-testid="video-status-message" class="mt-6 p-4 border border-app-border rounded-md bg-app-bg hidden">
+                <p class="text-sm text-app-text"></p>
+            </div>
+        </section>
+        
+        <!-- Module 4: AI Video Prompts -->
+        <section id="module4" class="module-content hidden p-12">
+            <div class="mb-8">
+                <h1 class="text-3xl sm:text-4xl font-semibold tracking-tight text-app-text mb-2">AI Video Prompt Builder</h1>
+                <p class="text-base text-app-text-secondary">Construct complex AI video generation prompts using our 7-layer methodology.</p>
+            </div>
+            
+            <!-- 7-Layer Form -->
+            <div class="space-y-6 max-w-4xl">
+                <div class="pl-4 border-l-2 border-app-border">
+                    <label class="text-xs font-semibold uppercase tracking-widest text-app-text-secondary mb-2 block">
+                        <span class="inline-block w-8 h-8 rounded-full bg-app-primary text-white text-center leading-8 mr-2">1</span>
+                        Subject
+                    </label>
+                    <input 
+                        type="text" 
+                        id="promptSubject" 
+                        data-testid="prompt-subject-input"
+                        class="w-full p-3 bg-app-bg border border-app-border rounded-md focus:border-app-primary focus:ring-1 focus:ring-app-primary focus:bg-white transition-colors duration-200"
+                        placeholder="What is the main subject? (e.g., A teacher explaining quantum physics)">
+                </div>
+                
+                <div class="pl-4 border-l-2 border-app-border">
+                    <label class="text-xs font-semibold uppercase tracking-widest text-app-text-secondary mb-2 block">
+                        <span class="inline-block w-8 h-8 rounded-full bg-app-primary text-white text-center leading-8 mr-2">2</span>
+                        Action
+                    </label>
+                    <input 
+                        type="text" 
+                        id="promptAction" 
+                        data-testid="prompt-action-input"
+                        class="w-full p-3 bg-app-bg border border-app-border rounded-md focus:border-app-primary focus:ring-1 focus:ring-app-primary focus:bg-white transition-colors duration-200"
+                        placeholder="What action is happening? (e.g., drawing diagrams on a whiteboard)">
+                </div>
+                
+                <div class="pl-4 border-l-2 border-app-border">
+                    <label class="text-xs font-semibold uppercase tracking-widest text-app-text-secondary mb-2 block">
+                        <span class="inline-block w-8 h-8 rounded-full bg-app-primary text-white text-center leading-8 mr-2">3</span>
+                        Camera Angle
+                    </label>
+                    <input 
+                        type="text" 
+                        id="promptCamera" 
+                        data-testid="prompt-camera-input"
+                        class="w-full p-3 bg-app-bg border border-app-border rounded-md focus:border-app-primary focus:ring-1 focus:ring-app-primary focus:bg-white transition-colors duration-200"
+                        placeholder="Camera perspective (e.g., Medium shot, slightly tilted)">
+                </div>
+                
+                <div class="pl-4 border-l-2 border-app-border">
+                    <label class="text-xs font-semibold uppercase tracking-widest text-app-text-secondary mb-2 block">
+                        <span class="inline-block w-8 h-8 rounded-full bg-app-primary text-white text-center leading-8 mr-2">4</span>
+                        Lighting
+                    </label>
+                    <input 
+                        type="text" 
+                        id="promptLighting" 
+                        data-testid="prompt-lighting-input"
+                        class="w-full p-3 bg-app-bg border border-app-border rounded-md focus:border-app-primary focus:ring-1 focus:ring-app-primary focus:bg-white transition-colors duration-200"
+                        placeholder="Lighting setup (e.g., Soft natural light from window)">
+                </div>
+                
+                <div class="pl-4 border-l-2 border-app-border">
+                    <label class="text-xs font-semibold uppercase tracking-widest text-app-text-secondary mb-2 block">
+                        <span class="inline-block w-8 h-8 rounded-full bg-app-primary text-white text-center leading-8 mr-2">5</span>
+                        Physics Rules
+                    </label>
+                    <input 
+                        type="text" 
+                        id="promptPhysics" 
+                        data-testid="prompt-physics-input"
+                        class="w-full p-3 bg-app-bg border border-app-border rounded-md focus:border-app-primary focus:ring-1 focus:ring-app-primary focus:bg-white transition-colors duration-200"
+                        placeholder="Physical behavior (e.g., Realistic motion, gravity applies)">
+                </div>
+                
+                <div class="pl-4 border-l-2 border-app-border">
+                    <label class="text-xs font-semibold uppercase tracking-widest text-app-text-secondary mb-2 block">
+                        <span class="inline-block w-8 h-8 rounded-full bg-app-primary text-white text-center leading-8 mr-2">6</span>
+                        Style
+                    </label>
+                    <input 
+                        type="text" 
+                        id="promptStyle" 
+                        data-testid="prompt-style-input"
+                        class="w-full p-3 bg-app-bg border border-app-border rounded-md focus:border-app-primary focus:ring-1 focus:ring-app-primary focus:bg-white transition-colors duration-200"
+                        placeholder="Visual style (e.g., Professional documentary style, 4K)">
+                </div>
+                
+                <div class="pl-4 border-l-2 border-app-border">
+                    <label class="text-xs font-semibold uppercase tracking-widest text-app-text-secondary mb-2 block">
+                        <span class="inline-block w-8 h-8 rounded-full bg-app-primary text-white text-center leading-8 mr-2">7</span>
+                        Duration
+                    </label>
+                    <input 
+                        type="text" 
+                        id="promptDuration" 
+                        data-testid="prompt-duration-input"
+                        class="w-full p-3 bg-app-bg border border-app-border rounded-md focus:border-app-primary focus:ring-1 focus:ring-app-primary focus:bg-white transition-colors duration-200"
+                        placeholder="Video length (e.g., 30 seconds)">
+                </div>
+            </div>
+            
+            <div class="mt-8 flex gap-4">
+                <button data-testid="compile-prompt-button" onclick="compileAndSavePrompt()" class="bg-app-primary text-white px-6 py-3 rounded-md font-medium hover:bg-app-primary-hover transition-all">
+                    <i class="ph ph-file-text mr-2"></i>Compile & Save Prompt
+                </button>
+                <button data-testid="clear-prompt-button" onclick="clearPromptForm()" class="bg-transparent border border-app-border text-app-text px-6 py-3 rounded-md hover:bg-app-bg transition-all">
+                    <i class="ph ph-x-circle mr-2"></i>Clear Form
+                </button>
+            </div>
+            
+            <!-- Compiled Prompt Display -->
+            <div id="compiledPromptContainer" data-testid="compiled-prompt-container" class="mt-6 hidden">
+                <label class="text-xs font-semibold uppercase tracking-widest text-app-text-secondary mb-2 block">Compiled Prompt</label>
+                <div id="compiledPrompt" data-testid="compiled-prompt-display" class="p-6 bg-app-bg border border-app-border rounded-md">
+                    <p class="text-sm text-app-text font-mono"></p>
+                </div>
+            </div>
+        </section>
+        
+    </main>
+    
+    <script>
+        // Get API URL from environment or default
+        const API_URL = 'https://learn-studio-3.preview.emergentagent.com';
+        
+        // Module switching
+        function switchModule(moduleId) {
+            // Hide all modules
+            document.querySelectorAll('.module-content').forEach(module => {
+                module.classList.add('hidden');
+            });
+            
+            // Remove active class from all sidebar items
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Show selected module
+            document.getElementById(moduleId).classList.remove('hidden');
+            
+            // Add active class to clicked sidebar item
+            event.target.closest('.sidebar-item').classList.add('active');
+        }
+        
+        // Module 1: Digital Books
+        document.getElementById('latexInput')?.addEventListener('input', function() {
+            const latexText = this.value;
+            // Simple conversion (in real app, use proper LaTeX to HTML converter)
+            let html = latexText
+                .replace(/\\\\section\{([^}]+)\}/g, '<h2>$1</h2>')
+                .replace(/\\\\subsection\{([^}]+)\}/g, '<h3>$1</h3>')
+                .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+                .replace(/\n\n/g, '</p><p>')
+                .replace(/^(.+)$/gm, '<p>$1</p>');
+            
+            document.getElementById('htmlPreview').innerHTML = html;
+        });
+        
+        async function renderBookContent() {
+            const latexInput = document.getElementById('latexInput').value;
+            const htmlOutput = document.getElementById('htmlPreview').innerHTML;
+            
+            try {
+                const response = await fetch(`${API_URL}/api/books/render`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        latex_input: latexInput,
+                        html_output: htmlOutput
+                    })
+                });
+                
+                if (response.ok) {
+                    alert('Book content saved successfully!');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to save book content');
+            }
+        }
+        
+        function clearBookEditor() {
+            document.getElementById('latexInput').value = '';
+            document.getElementById('htmlPreview').innerHTML = '';
+        }
+        
+        // Module 2: Comic Scripts
+        async function generateComicScript() {
+            const concept = document.getElementById('comicConcept').value.trim();
+            
+            if (!concept) {
+                alert('Please enter an educational concept');
+                return;
+            }
+            
+            const outputDiv = document.getElementById('comicOutput');
+            outputDiv.innerHTML = '<span class="opacity-50">Initializing AI agent...</span>\n';
+            
+            try {
+                outputDiv.innerHTML += '[GPT-5.2] Analyzing concept...\n';
+                outputDiv.innerHTML += '[GPT-5.2] Generating comic script structure...\n';
+                
+                const response = await fetch(`${API_URL}/api/comics/generate`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ concept: concept })
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    outputDiv.innerHTML += '[GPT-5.2] Script generation complete!\n\n';
+                    outputDiv.innerHTML += '=== FINAL COMIC SCRIPT ===\n\n';
+                    outputDiv.innerHTML += data.script;
+                } else {
+                    outputDiv.innerHTML += `\n[ERROR] ${data.error}`;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                outputDiv.innerHTML += `\n[ERROR] Failed to generate comic script: ${error.message}`;
+            }
+        }
+        
+        function clearComicOutput() {
+            document.getElementById('comicOutput').innerHTML = '<span class="opacity-50">Ready to generate comic scripts...</span>';
+        }
+        
+        // Module 3: Video Solutions
+        function previewQuestionImage() {
+            const file = document.getElementById('questionImage').files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('imagePreview').src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        async function generateVideoSolution() {
+            const questionText = document.getElementById('questionText').value.trim();
+            const voiceoverStyle = document.getElementById('voiceoverStyle').value;
+            
+            if (!questionText) {
+                alert('Please enter a question');
+                return;
+            }
+            
+            const statusDiv = document.getElementById('videoStatus');
+            statusDiv.classList.remove('hidden');
+            statusDiv.querySelector('p').textContent = 'Generating video solution... This feature uses Web Speech API for free TTS.';
+            
+            try {
+                // Use Web Speech API for TTS (free browser feature)
+                if ('speechSynthesis' in window) {
+                    const utterance = new SpeechSynthesisUtterance(questionText);
+                    utterance.rate = voiceoverStyle === 'enthusiastic' ? 1.1 : 1.0;
+                    utterance.pitch = voiceoverStyle === 'friendly' ? 1.1 : 1.0;
+                    window.speechSynthesis.speak(utterance);
+                }
+                
+                const response = await fetch(`${API_URL}/api/videos/create`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        question_text: questionText,
+                        voiceover_style: voiceoverStyle
+                    })
+                });
+                
+                if (response.ok) {
+                    statusDiv.querySelector('p').textContent = 'Video solution created! (Note: Full video generation requires additional setup)';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                statusDiv.querySelector('p').textContent = 'Failed to generate video solution';
+            }
+        }
+        
+        // Module 4: AI Video Prompts
+        async function compileAndSavePrompt() {
+            const subject = document.getElementById('promptSubject').value.trim();
+            const action = document.getElementById('promptAction').value.trim();
+            const camera = document.getElementById('promptCamera').value.trim();
+            const lighting = document.getElementById('promptLighting').value.trim();
+            const physics = document.getElementById('promptPhysics').value.trim();
+            const style = document.getElementById('promptStyle').value.trim();
+            const duration = document.getElementById('promptDuration').value.trim();
+            
+            if (!subject || !action) {
+                alert('Please fill in at least Subject and Action fields');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/api/prompts/create`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        subject, action, camera_angle: camera,
+                        lighting, physics, style, duration
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Show compiled prompt
+                    const container = document.getElementById('compiledPromptContainer');
+                    const display = document.getElementById('compiledPrompt').querySelector('p');
+                    container.classList.remove('hidden');
+                    display.textContent = data.final_prompt;
+                    
+                    alert('Prompt saved successfully!');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to save prompt');
+            }
+        }
+        
+        function clearPromptForm() {
+            document.getElementById('promptSubject').value = '';
+            document.getElementById('promptAction').value = '';
+            document.getElementById('promptCamera').value = '';
+            document.getElementById('promptLighting').value = '';
+            document.getElementById('promptPhysics').value = '';
+            document.getElementById('promptStyle').value = '';
+            document.getElementById('promptDuration').value = '';
+            document.getElementById('compiledPromptContainer').classList.add('hidden');
+        }
+    </script>
+    
+</body>
+</html>
